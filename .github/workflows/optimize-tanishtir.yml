@@ -1,0 +1,64 @@
+name: Optimize Tanishtir profile photos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/optimize-tanishtir.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  split-photos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out website
+        uses: actions/checkout@v4
+      - name: Extract embedded photos into individual files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, json, re
+
+          page = Path("index.html")
+          html = page.read_text(encoding="utf-8")
+          match = re.search(r'const photos=(\[.*?\]);\s*const people=', html, re.S)
+          if match is None:
+              if 'photos/001.jpg' in html and Path('photos/001.jpg').exists():
+                  print('Website is already optimized')
+                  raise SystemExit(0)
+              raise SystemExit('Embedded photos not found; refusing to modify website')
+          photos = json.loads(match.group(1))
+          if len(photos) != 100:
+              raise SystemExit(f'Expected 100 photos, got {len(photos)}')
+          photos_dir = Path('photos')
+          photos_dir.mkdir(exist_ok=True)
+          prefix = 'data:image/jpeg;base64,'
+          for index, src in enumerate(photos, 1):
+              if not isinstance(src, str) or not src.startswith(prefix):
+                  raise SystemExit(f'Photo {index} is not an embedded JPEG')
+              data = base64.b64decode(src[len(prefix):], validate=True)
+              if not data.startswith(b'\xff\xd8\xff'):
+                  raise SystemExit(f'Photo {index} has invalid JPEG header')
+              (photos_dir / f'{index:03d}.jpg').write_bytes(data)
+          urls = [f'photos/{i:03d}.jpg' for i in range(1, 101)]
+          replacement = 'const photos=' + json.dumps(urls, separators=(',', ':')) + ';\nconst people='
+          new_html = html[:match.start()] + replacement + html[match.end():]
+          if len(new_html) > 120000:
+              raise SystemExit('Optimized HTML too large; refusing to overwrite')
+          page.write_text(new_html, encoding='utf-8')
+          print(f'Wrote {len(urls)} photos and a {len(new_html.encode("utf-8"))}-byte HTML file')
+          PY
+      - name: Commit the optimized website
+        run: |
+          if [[ -n "$(git status --porcelain -- index.html photos)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html photos/
+            git commit -m "Optimize website loading with separate profile photos"
+            git push
+          else
+            echo "Nothing to update"
+          fi
