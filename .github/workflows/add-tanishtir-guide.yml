@@ -1,0 +1,42 @@
+name: Add Tanishtir guide screenshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/add-tanishtir-guide.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  add-guide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore existing Tanishtir guide screenshot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, json, base64, urllib.request
+          from pathlib import Path
+          url = 'https://api.github.com/repos/sdasdadasdsa/tanislaw/git/blobs/3feec503b1f772e6e9b5118aa21f915bd28f95ee'
+          headers = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'}
+          with urllib.request.urlopen(urllib.request.Request(url, headers=headers),timeout=30) as response:
+              blob = json.load(response)
+          data = base64.b64decode(blob['content'])
+          if not data.startswith(b'RIFF') or data[8:12] != b'WEBP':
+              raise RuntimeError('Unexpected guide image file format')
+          Path('guide').mkdir(exist_ok=True)
+          Path('guide/open.webp').write_bytes(data)
+          print('Wrote guide/open.webp:', len(data), 'bytes')
+          PY
+      - name: Commit guide screenshot and remove one-time importer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add guide/open.webp
+          git rm -f .github/workflows/add-tanishtir-guide.yml
+          git commit -m "Add guide image for optional APK install instructions"
+          git push
