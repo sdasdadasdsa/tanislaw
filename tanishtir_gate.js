@@ -6,7 +6,7 @@ var ua=navigator.userAgent||'';
 var os=/Android/i.test(ua)?'Android':(/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))?'iPhone / iOS':/Windows|Macintosh|Linux|CrOS/i.test(ua)?'ПК':'Другое';
 window.TANISHTIR_DEVICE_OS=os;
 var android=os==='Android';
-var gateEnabled=false, checking=false, LIMIT=70;
+var gateEnabled=false, checking=false, LIMIT=90;
 var viewKey='tanishtir_android_profiles_viewed_v3';
 var viewed=Math.max(0,Number(localStorage.getItem(viewKey))||0);
 function countViewed(){viewed++;localStorage.setItem(viewKey,String(viewed))}
@@ -45,7 +45,7 @@ gate.id='tsGate';gate.className='ts-overlay';gate.hidden=true;
 gate.innerHTML='<section class="ts-card" role="dialog" aria-modal="true" aria-labelledby="tsGateHeading">'+
 '<button class="ts-x" id="tsHideGate" type="button" aria-label="Ёпиш">×</button>'+
 '<div class="ts-heart" aria-hidden="true">♡</div><h2 id="tsGateHeading">Анкеталар лимити тугади!</h2>'+
-'<p>Кечирасиз, 70 та анкетани кўриб чиқдингиз. <strong>Иловада лимитлар йўқ!</strong> Танишувни давом эттириш учун иловани юклаб олинг.</p>'+
+'<p>Кечирасиз, 90 та анкетани кўриб чиқдингиз. <strong>Иловада лимитлар йўқ!</strong> Танишувни давом эттириш учун иловани юклаб олинг.</p>'+
 '<button class="ts-download" id="tsDownload" type="button">↓ Иловани юклаб олиш</button>'+
 '<div class="ts-label">Android учун · Tanislaw.apk</div></section>';
 var guide=document.createElement('div');guide.id='tsGuide';guide.className='ts-overlay';guide.hidden=true;
