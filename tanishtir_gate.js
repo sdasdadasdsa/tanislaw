@@ -8,7 +8,7 @@ window.TANISHTIR_DEVICE_OS=os;
 var android=os==='Android';
 var gateEnabled=false, checking=false, LIMIT=20;
 var counterKey='tanishtir_android_swipes_after_enabled_v1';
-var swipes=Math.max(0,Number(localStorage.getItem(counterKey))||0,Number(localStorage.getItem('dildosh_live_index_v3') ? JSON.parse(localStorage.getItem('dildosh_live_index_v3')) : 0)||0);
+var swipes=Math.max(0,Number(localStorage.getItem(counterKey))||0,Number(storeGet('index_v3',0))||0);
 var get=function(id){return document.getElementById(id)};
 async function reportDevice(){
  if(!apiBase||typeof visitorId!=='string')return;
