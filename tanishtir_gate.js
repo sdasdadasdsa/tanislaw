@@ -6,9 +6,8 @@ var ua=navigator.userAgent||'';
 var os=/Android/i.test(ua)?'Android':(/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))?'iPhone / iOS':/Windows|Macintosh|Linux|CrOS/i.test(ua)?'ПК':'Другое';
 window.TANISHTIR_DEVICE_OS=os;
 var android=os==='Android';
-var gateEnabled=false, checking=false, LIMIT=10;
-var counterKey='tanishtir_android_swipes_after_enabled_v1';
-var swipes=Math.max(0,Number(localStorage.getItem(counterKey))||0);
+var gateEnabled=false, checking=false, LIMIT=70;
+function likeCount(){return Array.isArray(state.likes)?state.likes.length:0}
 var get=function(id){return document.getElementById(id)};
 async function reportDevice(){
  if(!apiBase||typeof visitorId!=='string')return;
@@ -44,7 +43,7 @@ gate.id='tsGate';gate.className='ts-overlay';gate.hidden=true;
 gate.innerHTML='<section class="ts-card" role="dialog" aria-modal="true" aria-labelledby="tsGateHeading">'+
 '<button class="ts-x" id="tsHideGate" type="button" aria-label="Ёпиш">×</button>'+
 '<div class="ts-heart" aria-hidden="true">♡</div><h2 id="tsGateHeading">Анкеталар лимити тугади!</h2>'+
-'<p>Кечирасиз, 10 та анкетани кўриб чиқдингиз. <strong>Иловада лимитлар йўқ!</strong> Танишувни давом эттириш учун иловани юклаб олинг.</p>'+
+'<p>Кечирасиз, 70 та анкетага лайк босдингиз. <strong>Иловада лимитлар йўқ!</strong> Танишувни давом эттириш учун иловани юклаб олинг.</p>'+
 '<button class="ts-download" id="tsDownload" type="button">↓ Иловани юклаб олиш</button>'+
 '<div class="ts-label">Android учун · Tanislaw.apk</div></section>';
 var guide=document.createElement('div');guide.id='tsGuide';guide.className='ts-overlay';guide.hidden=true;
@@ -62,21 +61,22 @@ var frame=document.createElement('iframe');frame.hidden=true;frame.style.display
 function welcomeOpen(){return !get('welcomeOverlay')?.classList.contains('hidden')}
 function unlock(){if(!get('chatModal')?.classList.contains('open')&&!welcomeOpen())document.body.style.overflow=''}
 function closeOverlays(){gate.hidden=true;guide.hidden=true;unlock()}
-function showGate(){if(!gateEnabled||swipes<LIMIT||welcomeOpen()||!guide.hidden)return;gate.hidden=false;document.body.style.overflow='hidden'}
+function showGate(){if(!gateEnabled||likeCount()<LIMIT||welcomeOpen()||!guide.hidden)return;gate.hidden=false;document.body.style.overflow='hidden'}
 get('tsHideGate').addEventListener('click',function(){gate.hidden=true;unlock()});
 get('tsHideGuide').addEventListener('click',function(){guide.hidden=true;unlock()});
 get('welcomeContinue')?.addEventListener('click',function(){setTimeout(showGate,100)});
 var oldAct=window.act;
 if(typeof oldAct==='function')window.act=function(kind){
- if(gateEnabled&&swipes>=LIMIT){showGate();return}
- var canSwipe=gateEnabled&&(kind==='like'||kind==='nope')&&!busy&&!get('chatModal')?.classList.contains('open')&&get('discover')?.classList.contains('is-active');
+ if(gateEnabled&&likeCount()>=LIMIT){showGate();return}
+ var canCountLike=gateEnabled&&kind==='like'&&!busy&&!get('chatModal')?.classList.contains('open')&&get('discover')?.classList.contains('is-active');
+ var previousLikes=likeCount();
  var result=oldAct(kind);
- if(canSwipe){swipes++;localStorage.setItem(counterKey,String(swipes));if(swipes>=LIMIT)setTimeout(showGate,380)}
+ if(canCountLike&&likeCount()>previousLikes&&likeCount()>=LIMIT)setTimeout(showGate,380)
  return result;
 };
 var oldOpenChat=window.openChat;
 if(typeof oldOpenChat==='function')window.openChat=function(profile){
- if(gateEnabled&&swipes>=LIMIT&&!get('messages')?.classList.contains('is-active')){showGate();return}
+ if(gateEnabled&&likeCount()>=LIMIT&&!get('messages')?.classList.contains('is-active')){showGate();return}
  return oldOpenChat(profile);
 };
 function logClick(type){
@@ -98,7 +98,7 @@ async function checkReady(){
  try{var res=await fetch(apiBase+'/api/app-status',{cache:'no-store',mode:'cors'});if(!res.ok)throw Error('server unavailable');var data=await res.json();gateEnabled=data.available===true&&data.filename==='Tanislaw.apk'}
  catch(e){gateEnabled=false}
  finally{checking=false}
- if(!gateEnabled)closeOverlays();else if(swipes>=LIMIT)showGate();
+ if(!gateEnabled)closeOverlays();else if(likeCount()>=LIMIT)showGate();
 }
 void checkReady();
 setInterval(checkReady,30000);
