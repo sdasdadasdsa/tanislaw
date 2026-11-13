@@ -54,7 +54,7 @@ guide.innerHTML='<section class="ts-card ts-guide-card" role="dialog" aria-modal
 '<div class="ts-step"><div class="ts-step-top"><span class="ts-number">1</span>Юкланган файл ёнидаги «Ochish» тугмасини босинг</div>'+
 '<img class="ts-screenshot" src="guide/open.webp" alt="Юкланган файлни очиш" loading="lazy"></div>'+
 '<div class="ts-step"><div class="ts-step-top"><span class="ts-number">2</span>Ёки «Юклаб олинганлар» бўлимидаги файлни очинг</div>'+
-'<div class="ts-file"><span style="font-size:22px">▣</span><span><strong>Tanislaw.apk</strong><small>Android илова файли</small></span><span class="ts-arrow">↖</span></div></div>'+
+'<img class="ts-screenshot" src="guide/tanislaw-download.svg" alt="Ҳозиргина — Tanislaw.apk файлига босинг" loading="lazy"></div>'+
 '<button class="ts-download" id="tsRepeat" type="button">↻ Қайта юклаб олиш</button>'+
 '<p class="ts-note">Юклаб олиш фақат тугмани босганингизда бошланади.</p></section>';
 document.body.appendChild(gate);document.body.appendChild(guide);
