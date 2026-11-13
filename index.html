@@ -37,6 +37,18 @@ button,input{font:inherit}button{cursor:pointer;border:0}button:focus-visible,in
 .end-card[hidden]{display:none}.end-heart{font-size:95px;line-height:1;color:#ff65b1}.end-card h2{font-size:28px;line-height:1.22;margin:0;max-width:360px}.end-card p{font-size:14px;line-height:1.6;color:#d8bedb;margin:0;max-width:340px}.end-card button{background:linear-gradient(140deg,#fa4196,#a33bba);color:#fff;font-weight:800;padding:14px 19px;border-radius:14px}.profile-stage.finished::before,.profile-stage.finished::after{display:none}.profile-stage.finished{cursor:auto}.profile-stage.finished .profile-card{display:none}.profile-stage.finished .end-card{display:flex}.discover-center.finished .actions,.discover-center.finished .action-text{display:none}
 @media(max-width:730px){.end-card{min-height:min(62svh,545px)}.end-card h2{font-size:24px}}
 .demo-disclosure{font-size:12px;line-height:1.45;padding:10px 15px;background:#3d2647;color:#fbd7eb;border-top:1px solid #ffffff24;border-bottom:1px solid #ffffff24}.bubble.operator{background:#7f2d67;margin-left:0;align-self:flex-start}.bubble.visitor{background:#442353;margin-left:auto;align-self:flex-end}.bubble small{display:block;font-size:10px;opacity:.8;margin-top:4px}.footer-settings{display:inline-block;margin-left:12px;text-align:left;vertical-align:middle;position:relative}.footer-settings summary{cursor:pointer;color:#d7c0dd;font-size:12px}.footer-settings p{font-size:12px;margin:8px 0;max-width:310px}.footer-settings label{display:flex;align-items:center;gap:6px;cursor:pointer}.footer-settings input{accent-color:#f73188}
+
+/* Incoming chat notifications */
+.incoming-alert{position:fixed;top:18px;right:20px;width:min(400px,calc(100vw - 24px));z-index:80;display:flex;align-items:stretch;gap:5px;padding:8px;background:linear-gradient(135deg,#352045,#24132f);border:1px solid #f68ac166;border-radius:20px;box-shadow:0 20px 65px #0009;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-18px);transition:opacity .22s,transform .22s,visibility .22s}
+.incoming-alert.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.incoming-open{flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left;color:#fff;background:none;padding:6px;border-radius:14px}
+.incoming-open:hover{background:#ffffff13}.incoming-open img{width:53px;height:53px;border-radius:13px;object-fit:cover;flex-shrink:0}
+.incoming-copy{min-width:0;display:grid;gap:4px}.incoming-name{font-size:14px;font-weight:800;color:#ffc1dc}.incoming-message{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;color:#fff}
+.incoming-close{height:28px;width:28px;display:grid;place-items:center;align-self:flex-start;border-radius:50%;background:#ffffff18;color:#eee;font-size:20px;line-height:1}
+.navcounter.is-unread{background:#f7338d;color:#fff;box-shadow:0 0 0 3px #f7338d30}
+.thread-unread{display:grid;place-items:center;min-width:23px;height:23px;padding:0 6px;border-radius:20px;background:#ff3f91;color:#fff;font-size:12px;font-weight:800}
+.footer-settings .enable-device-notifications{display:block;margin-top:8px;background:#ffffff1a;border:1px solid #ffffff33;color:#fff;border-radius:10px;padding:8px 10px;font-size:12px}
+@media(max-width:640px){.incoming-alert{left:12px;right:12px;top:12px;width:auto}}
 </style>
 </head>
 <body>
@@ -58,9 +70,12 @@ button,input{font:inherit}button{cursor:pointer;border:0}button:focus-visible,in
 <section id="likes" class="view" aria-label="Ёқтирилганлар"><div class="panel-heading"><div><h1>Ёқтирган анкеталарингиз 💗</h1><p>Лайк босган анкеталарингиз шу ерда кўринади.</p></div><button class="plain-btn" type="button" data-back>Анкеталарга қайтиш</button></div><div id="likesContent"></div></section>
 <section id="messages" class="view" aria-label="Хабарлар"><div class="panel-heading"><div><h1>Хабарлар 💬</h1><p>Суҳбатларингиз шу ерда сақланади.</p></div><button class="plain-btn" type="button" data-back>Анкеталарга қайтиш</button></div><div id="messagesContent"></div></section>
 </main>
-<footer class="footer">18+ · Tanishtir <details class="footer-settings"><summary>Маълумот ва созламалар</summary><p>Анкеталар намойиш учун яратилган. Суҳбатларга оператор жавоб беради.</p><label><input id="broadcastToggle" type="checkbox"> Хабарномаларни олиш</label></details></footer>
+<footer class="footer">18+ · Tanishtir <details class="footer-settings"><summary>Маълумот ва созламалар</summary><p>Анкеталар намойиш учун яратилган. Суҳбатларга оператор жавоб беради.</p><label><input id="broadcastToggle" type="checkbox"> Хабарномаларни олиш</label><button id="enableDeviceNotifications" class="enable-device-notifications" type="button">Браузер билдиришномаларини ёқиш</button></details></footer>
 </div>
 <div class="modal" id="chatModal" role="dialog" aria-modal="true" aria-label="Суҳбат"><div class="chat-window"><div class="chat-header"><img id="chatAvatar" alt="Профил сурати"><div><h3 id="chatTitle">Суҳбат</h3><span>Хабарлар</span></div><button class="chat-close" id="closeChat" aria-label="Ёпиш" type="button"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="chat-messages" id="chatMessages" aria-live="polite"></div><form class="chat-compose" id="chatForm"><input id="chatInput" maxlength="500" autocomplete="off" placeholder="Хабарингизни ёзинг..." aria-label="Хабарингизни ёзинг" required><button type="submit" aria-label="Хабарни сақлаш"><svg class="icon"><use href="#i-send"/></svg></button></form></div></div>
+<div class="incoming-alert" id="incomingAlert" aria-hidden="true" role="status" aria-live="polite">
+<button id="incomingOpen" class="incoming-open" type="button" aria-label="Хабарни очиш"><img id="incomingAvatar" alt=""><span class="incoming-copy"><span class="incoming-name" id="incomingName">Янги хабар</span><span class="incoming-message" id="incomingMessage"></span></span></button>
+<button id="incomingClose" class="incoming-close" type="button" aria-label="Ёпиш">×</button></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="config.js"></script>
 <script>
@@ -111,13 +126,44 @@ function renderCurrent(){
   renderRight();
 }
 function renderRight(){const box=$('rightProfiles');box.replaceChildren();for(let i=1;i<=3;i++){const p=profileFor(state.index+i);if(!p)continue;const line=document.createElement('div');line.className='avatar-line';const img=new Image();setPhoto(img,p);img.alt='';const info=document.createElement('div');const b=document.createElement('b');b.textContent=p.name+', '+p.age;const sub=document.createElement('span');sub.textContent=p.city;info.append(b,sub);line.append(img,info);box.append(line)}}
-function updateCounts(){$('likedCount').textContent=state.likes.length;$('chatCount').textContent=Object.keys(state.chats).length}
+function updateCounts(){
+  $('likedCount').textContent=state.likes.length;
+  let unread=0;
+  for(const [id,thread] of Object.entries(state.chats)){
+    const seen=Number(readByProfile[id])||0;
+    unread+=(thread.messages||[]).filter(m=>m.sender==='operator'&&Number(m.id)>seen).length;
+  }
+  const counter=$('chatCount');
+  counter.textContent=unread||Object.keys(state.chats).length;
+  counter.classList.toggle('is-unread',unread>0);
+  document.title=unread?'('+unread+') Tanishtir — Хабарлар':'Tanishtir — Танишув';
+}
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2050)}
 function act(kind){if(busy||!current()||$('chatModal').classList.contains('open'))return;busy=true;const p=current();if(kind==='like'){state.likeActions++;if(!state.likes.some(x=>x.id===p.id)){state.likes.unshift({id:p.id});storeSet('likes',state.likes)}storeSet('likeActions',state.likeActions);toast(p.name+' ёқтирилганларга қўшилди 💗')}const card=$('profileCard');card.classList.remove('no-transition');card.classList.add(kind==='like'?'exit-like':'exit-nope');setTimeout(()=>{state.index=(state.index+1)%photos.length;storeSet('index_v3',state.index);card.classList.add('no-transition');card.classList.remove('exit-like','exit-nope');$('stage').classList.remove('swipe-like','swipe-nope');card.style.transform='';renderCurrent();updateCounts();void card.offsetWidth;card.classList.remove('no-transition');busy=false},320)}
 function setTab(tab){for(const el of document.querySelectorAll('.view'))el.classList.toggle('is-active',el.id===tab);for(const b of document.querySelectorAll('[data-tab]')){const on=b.dataset.tab===tab;b.classList.toggle('active',on);b.setAttribute('aria-current',on?'page':'false')}if(tab==='likes')renderLikes();if(tab==='messages')renderThreads();window.scrollTo({top:0,behavior:'smooth'})}
 function emptyState(root,name,desc){const el=document.createElement('div');el.className='empty';const mark=icon(name==='Лайк'?'heart':'chat');mark.classList.add('empty-icon');const title=document.createElement('strong');title.textContent=name==='Лайк'?'Ҳозирча лайк йўқ':'Ҳозирча хабар йўқ';const p=document.createElement('p');p.textContent=desc;const btn=document.createElement('button');btn.type='button';btn.textContent='Танишувга ўтиш';btn.addEventListener('click',()=>setTab('discover'));el.append(mark,title,p,btn);root.append(el)}
 function renderLikes(){const box=$('likesContent');box.replaceChildren();if(state.likes.length===0){emptyState(box,'Лайк','Қиз анкетасида юракчани босинг — у шу ерда сақланади.');return}const grid=document.createElement('div');grid.className='profiles-grid';for(const saved of state.likes){const p=people.find((_,i)=>'person-'+i===saved.id);if(!p)continue;const ix=Number(saved.id.replace('person-',''));const b=document.createElement('button');b.className='small-profile';b.type='button';const img=new Image();setPhoto(img,profileFor(ix));img.alt='';const info=document.createElement('div');info.className='small-info';const bold=document.createElement('b');bold.textContent=p.name+', '+p.age;const city=document.createElement('div');city.textContent=p.city+' · Хабар ёзиш';info.append(bold,city);b.append(img,info);b.addEventListener('click',()=>openChat(profileFor(ix)));grid.append(b)}box.append(grid)}
-function renderThreads(){const box=$('messagesContent');box.replaceChildren();const ids=Object.keys(state.chats).filter(x=>state.chats[x]?.messages?.length);if(!ids.length){emptyState(box,'Хабар','Анкета остидаги суҳбат тугмасини босиб, хабар ёзинг.');return}const list=document.createElement('div');list.className='thread-list';for(const id of ids.reverse()){const ix=Number(id.replace('person-',''));if(!Number.isInteger(ix)||ix<0||ix>=people.length)continue;const p=profileFor(ix),thread=state.chats[id];const row=document.createElement('button');row.className='thread';row.type='button';const img=new Image();setPhoto(img,p);img.alt='';const details=document.createElement('div');details.className='thread-details';const name=document.createElement('b');name.textContent=p.name+', '+p.age;const last=document.createElement('p');last.textContent=thread.messages[thread.messages.length-1]?.text||'';details.append(name,last);row.append(img,details,icon('arrow'));row.addEventListener('click',()=>openChat(p));list.append(row)}box.append(list)}
+function renderThreads(){
+  const box=$('messagesContent');box.replaceChildren();
+  const ids=Object.keys(state.chats).filter(x=>state.chats[x]?.messages?.length);
+  if(!ids.length){emptyState(box,'Хабар','Анкета остидаги суҳбат тугмасини босиб, хабар ёзинг.');return}
+  const list=document.createElement('div');list.className='thread-list';
+  for(const id of ids.reverse()){
+    const ix=Number(id.replace('person-',''));
+    if(!Number.isInteger(ix)||ix<0||ix>=people.length)continue;
+    const p=profileFor(ix),thread=state.chats[id];
+    const row=document.createElement('button');row.className='thread';row.type='button';
+    const img=new Image();setPhoto(img,p);img.alt='';
+    const details=document.createElement('div');details.className='thread-details';
+    const name=document.createElement('b');name.textContent=p.name+', '+p.age;
+    const last=document.createElement('p');last.textContent=thread.messages[thread.messages.length-1]?.text||'';
+    details.append(name,last);row.append(img,details);
+    const unseen=(thread.messages||[]).filter(m=>m.sender==='operator'&&Number(m.id)>(Number(readByProfile[id])||0)).length;
+    if(unseen){const badge=document.createElement('span');badge.className='thread-unread';badge.textContent=unseen>99?'99+':String(unseen);row.append(badge)}
+    row.append(icon('arrow'));row.addEventListener('click',()=>openChat(p));list.append(row)
+  }
+  box.append(list)
+}
 const API_BASE=(window.TANISHTIR_API_BASE||'').trim().replace(/\/$/,'');
 let visitorId=localStorage.getItem('tanishtir_visitor_id');
 if(!visitorId||!/^[a-f0-9]{64}$/.test(visitorId)){
@@ -125,6 +171,52 @@ if(!visitorId||!/^[a-f0-9]{64}$/.test(visitorId)){
   visitorId=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
   localStorage.setItem('tanishtir_visitor_id',visitorId);
 }
+const readStoreKey='tanishtir_read_msg_ids_v1_'+visitorId;
+const lastStoreKey='tanishtir_last_inbox_id_v1_'+visitorId;
+let readByProfile=storeGet(readStoreKey,{});
+if(!readByProfile||typeof readByProfile!=='object'||Array.isArray(readByProfile))readByProfile={};
+const hasSavedReadState=localStorage.getItem('dildosh_live_'+readStoreKey)!==null;
+let lastInboxId=Number(storeGet(lastStoreKey,0))||0;
+let inboxInitialized=false;
+let incomingTimer=null;
+function markRead(id){
+  const messages=state.chats[id]?.messages||[];
+  const last=messages.reduce((acc,m)=>m.sender==='operator'?Math.max(acc,Number(m.id)||0):acc,0);
+  if(last>(Number(readByProfile[id])||0)){
+    readByProfile[id]=last;storeSet(readStoreKey,readByProfile);
+  }
+  updateCounts();
+}
+function hideIncoming(){
+  clearTimeout(incomingTimer);
+  $('incomingAlert').classList.remove('show');
+  $('incomingAlert').setAttribute('aria-hidden','true');
+}
+function showIncoming(message){
+  const p=profileFor(Number(message.profile_id));if(!p)return;
+  const alert=$('incomingAlert');
+  setPhoto($('incomingAvatar'),p);
+  $('incomingName').textContent=p.name+' · Янги хабар';
+  $('incomingMessage').textContent=message.text||'Янги хабар келди';
+  $('incomingOpen').onclick=()=>{hideIncoming();openChat(p)};
+  $('incomingClose').onclick=hideIncoming;
+  alert.classList.add('show');alert.setAttribute('aria-hidden','false');
+  clearTimeout(incomingTimer);incomingTimer=setTimeout(hideIncoming,9500);
+  if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){
+    try{
+      const n=new Notification(p.name+' · Янги хабар',{body:message.text,icon:p.photo,tag:'tanishtir-'+message.profile_id});
+      n.onclick=()=>{window.focus();openChat(p);n.close()};
+    }catch(e){console.warn('Notification:',e.message)}
+  }
+}
+$('enableDeviceNotifications').addEventListener('click',async()=>{
+  if(!('Notification' in window)){toast('Бу браузерда билдиришнома мавжуд эмас');return}
+  if(!window.isSecureContext){toast('HTTPS керак');return}
+  try{
+    const permission=await Notification.requestPermission();
+    toast(permission==='granted'?'Браузер билдиришномалари ёқилди':'Браузер билдиришномасига рухсат берилмади');
+  }catch(e){toast('Браузер билдиришномасини ёқиб бўлмади')}
+});
 async function api(path,opts={}){
   const res=await fetch(API_BASE+path,{...opts,headers:{'Content-Type':'application/json',...(opts.headers||{})}});
   if(!res.ok)throw Error('HTTP '+res.status);
@@ -136,7 +228,8 @@ async function refreshChat(){
   try{
     const data=await api('/api/messages?visitor='+visitorId+'&profile='+expected.replace('person-',''));
     if(!dialogProfile||dialogProfile.id!==expected)return;
-    state.chats[expected]={messages:data.messages.map(m=>({text:m.text,at:m.created_at*1000,sender:m.sender}))};
+    state.chats[expected]={messages:data.messages.map(m=>({id:m.id,text:m.text,at:m.created_at*1000,sender:m.sender}))};
+    if(!document.hidden)markRead(expected);
     renderMessages();renderThreads();updateCounts();
   }catch(e){console.warn('Chat sync:',e.message)}
 }
@@ -146,6 +239,7 @@ function openChat(p){
   setPhoto($('chatAvatar'),p);$('chatTitle').textContent=p.name+', '+p.age;
   $('chatModal').classList.add('open');document.body.style.overflow='hidden';
   renderMessages();$('chatInput').value='';
+  if(!document.hidden)markRead(p.id);
   if(API_BASE)void refreshChat();
   setTimeout(()=>$('chatInput').focus(),100);
 }
@@ -188,10 +282,29 @@ async function syncInbox(){
   if(!API_BASE)return;
   try{
     const res=await api('/api/inbox?visitor='+visitorId);
+    const messages=Array.isArray(res.messages)?res.messages:[];
+    const highest=messages.reduce((acc,m)=>Math.max(acc,Number(m.id)||0),0);
     const byProfile={};
-    for(const m of res.messages){const k='person-'+m.profile_id;
-      (byProfile[k]??=[]).push({text:m.text,at:m.created_at*1000,sender:m.sender});}
-    state.chats={};for(const [k,messages] of Object.entries(byProfile))state.chats[k]={messages};
+    for(const m of messages){
+      const k='person-'+m.profile_id;
+      (byProfile[k]??=[]).push({id:m.id,text:m.text,at:m.created_at*1000,sender:m.sender});
+    }
+    state.chats={};for(const [k,items] of Object.entries(byProfile))state.chats[k]={messages:items};
+    if(!inboxInitialized&&!hasSavedReadState){
+      for(const [id,thread] of Object.entries(state.chats)){
+        readByProfile[id]=thread.messages.reduce((acc,m)=>m.sender==='operator'?Math.max(acc,Number(m.id)||0):acc,0);
+      }
+      storeSet(readStoreKey,readByProfile);
+    }
+    const incoming=messages.filter(m=>m.sender==='operator'&&Number(m.id)>lastInboxId&&(inboxInitialized||lastInboxId>0));
+    if(dialogProfile&&!document.hidden)markRead(dialogProfile.id);
+    if(incoming.length){
+      const latest=incoming[incoming.length-1];
+      if(document.hidden||dialogProfile?.id!=='person-'+latest.profile_id)showIncoming(latest);
+    }
+    lastInboxId=Math.max(lastInboxId,highest);
+    storeSet(lastStoreKey,lastInboxId);
+    inboxInitialized=true;
     renderThreads();updateCounts();if(dialogProfile)renderMessages();
   }catch(e){console.warn('Inbox',e.message)}
 }
